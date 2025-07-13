@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Book CRUD</title>
+    {% load static %}
+</head>
+<body>
+    <h1>Books</h1>
+
+    <form id="book-form">
+        <input type="text" id="title" placeholder="Title" required>
+        <input type="text" id="author" placeholder="Author" required>
+        <button type="submit">Add Book</button>
+    </form>
+
+    <ul id="book-list"></ul>
+    <a href="{% url 'monitor' %}">Server Monitor</a>
+    <script>
+        async function fetchBooks() {
+            const res = await fetch('getbooks/');
+            const books = await res.json();
+            const list = document.getElementById('book-list');
+            list.innerHTML = '';
+            books.forEach(book => {
+                const li = document.createElement('li');
+                li.textContent = `${book.title} by ${book.author}`;
+                const btn = document.createElement('button');
+                btn.textContent = 'Delete';
+                btn.onclick = () => deleteBook(book.id);
+                li.appendChild(btn);
+                list.appendChild(li);
+            });
+        }
+
+        async function createBook(e) {
+            e.preventDefault();
+            const title = document.getElementById('title').value;
+            const author = document.getElementById('author').value;
+
+            await fetch('create/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ title, author })
+            });
+
+            document.getElementById('book-form').reset();
+            fetchBooks();
+        }
+
+        async function deleteBook(id) {
+            await fetch(`delete/${id}/`, { method: 'POST' });
+            fetchBooks();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('book-form').addEventListener('submit', createBook);
+            fetchBooks();
+        });
+    </script>
+</body>
+</html>

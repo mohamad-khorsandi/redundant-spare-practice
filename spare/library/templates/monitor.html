@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Server Monitor</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    #status { margin-top: 20px; font-size: 20px; }
+  </style>
+</head>
+<body>
+
+  <h1>Server Health Monitor</h1>
+  <button id="crash-btn">Crash Server</button>
+
+  <div id="status">Server is online ✅</div>
+  <div id="counter"></div>
+
+  <a href="{% url 'index' %}">Back</a>
+  <script>
+    const crashBtn = document.getElementById('crash-btn');
+    const statusDiv = document.getElementById('status');
+    const counterDiv = document.getElementById('counter');
+
+    let counter = 0;
+    let cntInterval = null;
+    let pingInterval = null;
+
+    async function pingServer() {
+      try {
+        const res = await fetch('ping/', { cache: 'no-store' });
+        if (res.ok) {
+          clearInterval(pingInterval);
+          clearInterval(cntInterval);
+          console.log('clearInterval')
+          statusDiv.textContent = 'Server is back online ✅';
+          counterDiv.textContent = `Last down time: ${counter} millisecond`;
+        }
+      } catch (e) {
+        // still down, do nothing
+      }
+    }
+
+    crashBtn.addEventListener('click', async () => {
+      try {
+        await fetch('crash/', { method: 'POST' });
+      } catch (e) {
+        console.warn('Crash triggered');
+      }
+
+      counter = 0;
+      statusDiv.textContent = 'Server is down ❌';
+      counterDiv.textContent = `Down for ${counter} seconds`;
+      clearInterval(cntInterval);
+      clearInterval(pingInterval);
+
+      cntInterval = setInterval(() => {
+        counter += 1;
+        counterDiv.textContent = `Down for ${counter} seconds`;
+      }, 1);
+
+  
+      pingInterval = setInterval(pingServer, 1000);
+    });
+  </script>
+
+</body>
+</html>
