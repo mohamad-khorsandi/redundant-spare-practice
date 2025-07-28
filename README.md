@@ -1,4 +1,7 @@
-﻿# how to install:
+This is an exercise for practicing availability patterns architectural, specially redundant spare pattern.
+This exercise is designed based on "Software Architecture in Practice" book, intended to use in software architecture classes.
+persian documentation is available in the repository.
+## how to install:
 
 1. clone the repo
 
